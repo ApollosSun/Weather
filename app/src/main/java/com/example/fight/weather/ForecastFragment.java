@@ -116,7 +116,15 @@ public class ForecastFragment extends Fragment{
             return shortenedDataFormat.format(time);
         }
 
-        private String formatHighLows (double high, double low){
+        private String formatHighLows (double high, double low, String unitType){
+
+            if(unitType.equals(getString(R.string.pref_units_imperial))){
+                high = (high * 1.8) + 32;
+                low = (low * 1.8) + 32;
+            } else if (!unitType.equals(getString(R.string.pref_units_metric))){
+                Log.d(LOG_TAG, "Unit type not found: " + unitType);
+            }
+
             long roundedHigh = Math.round(high);
             long roundedLow = Math.round(low);
             String highLowStr = roundedHigh + "/" + roundedLow;
@@ -140,6 +148,13 @@ public class ForecastFragment extends Fragment{
             Date dayTime = Calendar.getInstance().getTime();
 
             String[] resultStrs = new String[numDays];
+
+            SharedPreferences sharedPreferences = PreferenceManager
+                    .getDefaultSharedPreferences(getActivity());
+            String unitType = sharedPreferences.getString(getString(R.string.pref_units_key)
+                    ,getString(R.string.pref_units_default));
+
+
             for (int i = 0; i < weatherArray.length(); i++){
 
                 String day;
@@ -164,7 +179,7 @@ public class ForecastFragment extends Fragment{
                 double high = temperatureObject.getDouble(OWM_MAX);
                 double low = temperatureObject.getDouble(OWM_MIN);
 
-                highAndLow = formatHighLows(high, low);
+                highAndLow = formatHighLows(high, low, unitType);
                 //resultStrs[i] = day + " - " + description + " - " + highAndLow;
                 //TEST
                 resultStrs[i] = dtTime + " - " + description + " - " + highAndLow;
