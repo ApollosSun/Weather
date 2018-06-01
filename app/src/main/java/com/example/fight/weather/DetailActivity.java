@@ -3,15 +3,17 @@ package com.example.fight.weather;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.ShareActionProvider;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
-import org.w3c.dom.Text;
 
 public class DetailActivity extends AppCompatActivity{
 
@@ -54,7 +56,12 @@ public class DetailActivity extends AppCompatActivity{
      */
     public static class DetailFragment extends Fragment {
 
+        public static final String LOG_TAG = DetailActivity.class.getSimpleName();
+        public static final String HASHTAG = "#MyWeatherApp";
+        public String mForecastStr;
+
         public DetailFragment() {
+            setHasOptionsMenu(true);
         }
 
         @Override
@@ -64,10 +71,39 @@ public class DetailActivity extends AppCompatActivity{
             View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
             Intent intent = getActivity().getIntent();
             if(intent != null && intent.hasExtra(Intent.EXTRA_TEXT)){
-                String forecastStr = intent.getStringExtra(Intent.EXTRA_TEXT);
-                ((TextView) rootView.findViewById(R.id.text_forecast)).setText(forecastStr);
+                mForecastStr = intent.getStringExtra(Intent.EXTRA_TEXT);
+                ((TextView) rootView.findViewById(R.id.text_forecast)).setText(mForecastStr);
             }
             return rootView;
+        }
+
+        @Override
+        public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+            inflater.inflate(R.menu.detail_fragment, menu);
+
+            // Retrieve the share menu item
+            MenuItem menuItem = menu.findItem(R.id.action_share);
+
+            // Get the provider and hold onto it to set/change the share intent.
+            ShareActionProvider mShareActionProvider =
+                    (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
+
+            //startActivity(shareIntent());
+
+            if (mShareActionProvider != null){
+                mShareActionProvider.setShareIntent(shareIntent());
+            } else {
+                Log.d(LOG_TAG, "Share Action Provider is null ?");
+            }
+        }
+
+        public Intent shareIntent (){
+            Intent intentSend = new Intent (Intent.ACTION_SEND);
+            intentSend.setFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+            intentSend.setType("text/plain");
+            intentSend.putExtra(Intent.EXTRA_TEXT, mForecastStr + HASHTAG);
+
+            return intentSend;
         }
     }
 }
